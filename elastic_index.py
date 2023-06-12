@@ -96,10 +96,17 @@ class Index:
                     for value in item["values"]:
                         matches.append({"multi_match": {"query": value, "fields": ["*"]}})
                 else:
-                    if len(item["values"]) > 1:
-                        matches.append({"terms": {item["field"] + ".keyword": item["values"]}})
+                    if item["field"] in self.config["ranges"]:
+                        range_values = item["values"][0]
+                        r_array = range_values.split('-')
+                        matches.append({"range": {item["field"]: {"gte": r_array[0], "lte": r_array[1]}}})
                     else:
-                        matches.append({"term": {item["field"] + ".keyword": item["values"][0]}})
+                        if len(item["values"]) > 1:
+                            matches.append({"terms": {item["field"] + ".keyword": item["values"]}})
+                        else:
+                            matches.append({"term": {item["field"] + ".keyword": item["values"][0]}})
+
+            print(matches)
             response = self.client.search(
                 index="esta",
                 body={"query": {

@@ -10,7 +10,8 @@ app = Flask(__name__)
 es_config = {
     "url" : "localhost",
     "port" : "9200",
-    "doc_type" : "manuscript"
+    "doc_type" : "manuscript",
+    "ranges": ["year", "sub_voyage.slaves_total"]
 }
 
 db_config = {
