@@ -44,32 +44,40 @@ class Index:
         return ret_array
 
     def get_filter_facet(self, field, amount, facet_filter):
-        print(facet_filter)
         ret_array = []
         response = self.client.search(
             index="esta",
-            body=
-            {
-                "query": {
-                    "regexp": {
-                        field: self.no_case(facet_filter)
-                    }
-                },
-                "size": 0,
-                "aggs": {
-                    "names": {
-                        "terms": {
-                            "field": field,
-                            "size": amount,
-                            "order": {
-                                "_count": "desc"
+            body={
+            "size": 0,
+            "aggs": {
+                "nested_terms": {
+                    "nested": {
+                        "path": "sub_voyage"
+                    },
+                    "aggs": {
+                        "filter": {
+                            "filter": {
+                                "regexp": {
+                                    field: facet_filter + ".*"
+                                }
+                            },
+                            "aggs": {
+                                "names": {
+                                    "terms": {
+                                        "field": field + ".keyword",
+                                        "size": amount
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+
         )
-        for hits in response["aggregations"]["names"]["buckets"]:
+
+        for hits in response["aggregations"]["nested_terms"]["filter"]["names"]["buckets"]:
             buffer = {"key": hits["key"], "doc_count": hits["doc_count"]}
             ret_array.append(buffer)
         return ret_array
@@ -106,7 +114,6 @@ class Index:
                         else:
                             matches.append({"term": {item["field"] + ".keyword": item["values"][0]}})
 
-            print(matches)
             response = self.client.search(
                 index="esta",
                 body={"query": {

@@ -51,7 +51,7 @@ def get_filter_facet():
     facet = request.args.get("name")
     amount = request.args.get("amount")
     facet_filter = request.args.get("filter")
-    ret_struc = index.get_filter_facet(facet + ".keyword", amount, facet_filter)
+    ret_struc = index.get_filter_facet(facet, amount, facet_filter)
     return json.dumps(ret_struc)
 
 @app.route("/browse", methods=['POST'])
